@@ -4,7 +4,10 @@ version = "0.1.0"
 authors = ["como"]
 
 [dependencies]
-discord = "0.8.0"
 serde = "1.0"
 serde_yaml = "0.7.3"
 serde_derive = "1.0"
+
+[dependencies.discord]
+git = "https://github.com/SpaceManiac/discord-rs.git"
+rev = "c6d89e5863341964017adb49c09d8637da162786"

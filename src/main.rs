@@ -9,6 +9,7 @@ extern crate serde_derive;
 use discord::model::ChannelId;
 use discord::model::Event;
 use discord::Discord;
+use discord::Result;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -24,6 +25,7 @@ struct Config {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 struct SecretConfig {
     token: String,
+    is_user_token: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -48,6 +50,16 @@ fn load_secret_config(path: &str) -> SecretConfig {
     return serde_yaml::from_str(&contents).expect("couldn't parse secret file");
 }
 
+fn connect(secret_config: &SecretConfig) -> Result<Discord> {
+    if secret_config.is_user_token {
+        println!("Connecting using user token.");
+        return Discord::from_user_token(&secret_config.token)
+    } else {
+        println!("Connecting using bot token.");
+        return Discord::from_bot_token(&secret_config.token)
+    }
+}
+
 fn main() {
     let config_path = env::args().nth(1).expect("Not enough args");
     let secret_config_path = env::args().nth(2).expect("Not enough args");
@@ -57,9 +69,10 @@ fn main() {
 
     // Loop forever so that we can handle restarts appropriately.
     loop {
-        match Discord::from_bot_token(&secret_config.token) {
+        match connect(&secret_config) {
             Ok(discord) => {
                 let (mut connection, _)= discord.connect().expect("connect failed");
+                println!("Successfully connected.");
                 loop {
                     match connection.recv_event() {
                         Ok(Event::MessageCreate(message)) => {
