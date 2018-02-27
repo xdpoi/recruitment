@@ -1,0 +1,4 @@
+/secret.yaml
+/target/
+**/*.rs.bk
+Cargo.lock
